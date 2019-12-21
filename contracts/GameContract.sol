@@ -1,4 +1,5 @@
 pragma solidity ^0.5.0;
+pragma experimental ABIEncoderV2;
 
 contract GameContract {
 
@@ -13,9 +14,9 @@ contract GameContract {
     address hostPlayer;
     bytes32 hostPlayerHand;
     address guestPlayer;
-    uint256 depositAmount;
     uint guestPlayerHand;
     uint16 gameStatus;
+    uint256 depositAmount;
     uint256 lastUpdatedTime;
   }
 
@@ -29,7 +30,7 @@ contract GameContract {
   function createGame(uint256 _hand, string memory _passward) public payable {
     gameId = gameId + 1;
     bytes32 _hostPlayerHand = keccak256(abi.encodePacked(_hand, _passward));
-    games[gameId] = Game(gameId, msg.sender, _hostPlayerHand, temporalGuestPlayer, 0, msg.value, 0, now);
+    games[gameId] = Game(gameId, msg.sender, _hostPlayerHand, temporalGuestPlayer, 0, 0, msg.value, now);
     deposit(gameId);
     emit CreatedGame(gameId, msg.sender, msg.value, now);
   }
@@ -57,7 +58,6 @@ contract GameContract {
   // Join game (deposit, hand)
   function joinGame(uint256 _gameId, uint256 _hand) public payable {
     Game memory _game = games[_gameId];
-    require(_game.gameId == _gameId);
     require(_game.depositAmount == msg.value);
     require(_game.gameStatus == 0);
     _game.guestPlayer = msg.sender;
@@ -80,9 +80,10 @@ contract GameContract {
   }
 
   // 答え合わせ
-  function endGame(uint256 _gameId, uint256 _hand, string memory _passward) public payable {
+  function gameResult(uint256 _gameId, uint256 _hand, string memory _passward) public {
     Game memory _game = games[_gameId];
     require(_game.hostPlayer == msg.sender);
+    require(_game.gameStatus == 1);
     require(_game.hostPlayerHand == keccak256(abi.encodePacked(_hand, _passward)));
     if (_hand ==  _game.guestPlayerHand) {
       _game.gameStatus = 2;
@@ -95,6 +96,7 @@ contract GameContract {
       balanceOf[_game.guestPlayer][_gameId] = balanceOf[_game.guestPlayer][_gameId] + _game.depositAmount;
       balanceOf[_game.hostPlayer][_gameId] = balanceOf[_game.hostPlayer][_gameId] - _game.depositAmount;
     }
+    games[_gameId] = _game;
   }
 
   function getDepositedEther(uint256 _gameId) public payable {
@@ -114,5 +116,8 @@ contract GameContract {
     }
   }
 
-}
+  function getGameInfo(uint256 _gameId) public view returns (Game memory) {
+    return games[_gameId];
+  }
 
+}
