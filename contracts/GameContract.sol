@@ -116,8 +116,12 @@ contract GameContract {
     }
   }
 
-  function getGameInfo(uint256 _gameId) public view returns (Game memory) {
+  function getGameInfo(uint256 _gameId) external view returns (Game memory) {
     return games[_gameId];
+  }
+
+  function getGameId() external view returns (uint256) {
+    return gameId;
   }
 
 }
