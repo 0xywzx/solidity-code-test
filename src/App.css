@@ -1,5 +1,5 @@
 .App {
-  text-align: center;
+
 }
 
 .App-header {
@@ -11,6 +11,31 @@
 
 .App-body {
   background-color: white;
+  width: 680px;
+  margin: 0 auto 40px;
 }
 
+.create-game {
+  margin: 80px 0px;
+}
+
+.create-game input {
+  margin-left: 10px;
+} 
+
+.create-game select {
+  margin-left: 10px;
+} 
+
+.create-game button {
+  margin: 5px 8px;
+}
+
+.game-item {
+  margin-top: 10px;
+}
+
+.game-item span {
+  padding-right: 15px;
+}
 

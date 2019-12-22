@@ -15,7 +15,7 @@ contract GameContract {
     bytes32 hostPlayerHand;
     address guestPlayer;
     uint guestPlayerHand;
-    uint16 gameStatus;
+    uint gameStatus;
     uint256 depositAmount;
     uint256 lastUpdatedTime;
   }
@@ -40,6 +40,7 @@ contract GameContract {
   }
 
   function withdraw(uint256 _amount) private {
+
     msg.sender.transfer(_amount);
 	}
 
@@ -105,15 +106,16 @@ contract GameContract {
     if (_game.gameStatus == 3) {
       require(_game.hostPlayer == msg.sender);
       require(balanceOf[msg.sender][_gameId] >= _game.depositAmount*2);
-      withdraw(balanceOf[msg.sender][_gameId]);
     } else if (_game.gameStatus == 4) {
       require(_game.guestPlayer == msg.sender);
       require(balanceOf[msg.sender][_gameId] >= _game.depositAmount*2);
-      withdraw(balanceOf[msg.sender][_gameId]);
     } else {
       require(balanceOf[msg.sender][_gameId] >= _game.depositAmount);
-      withdraw(balanceOf[msg.sender][_gameId]);
     }
+    balanceOf[msg.sender][_gameId] = 0;
+    withdraw(balanceOf[msg.sender][_gameId]);
+    _game.gameStatus = 5;
+    games[_gameId] = _game;
   }
 
   function getGameInfo(uint256 _gameId) external view returns (Game memory) {

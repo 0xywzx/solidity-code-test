@@ -90,7 +90,10 @@ contract('TraceableToken', ([deployer, user1, user2]) => {
           
           describe('get deposited ether', () => {
             describe('success', async() => {
-              it('')
+              it('host player successfully withdrow deposited ether', async() => {
+                result = await contract.getDepositedEther(1, {from: user1})
+                
+              })
             })
   
             describe('failure', async() => {
