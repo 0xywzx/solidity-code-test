@@ -22,7 +22,7 @@ contract GameContract {
     uint256 lastUpdatedTime;
   }
 
-  event CreatedGame(uint256 gameId, address hostPlayer, uint256 depositAmount, uint256 openTime);
+  event CreatedGame(uint256 gameId);
 
   constructor () public{
     owner = msg.sender;
@@ -34,7 +34,7 @@ contract GameContract {
     bytes32 _hostPlayerHand = keccak256(abi.encodePacked(_hand, _passward));
     games[gameId] = Game(gameId, msg.sender, _hostPlayerHand, temporalGuestPlayer, 0, 0, msg.value, now);
     deposit(gameId);
-    emit CreatedGame(gameId, msg.sender, msg.value, now);
+    emit CreatedGame(gameId);
   }
 
   function deposit(uint256 _gameId) public payable {
@@ -60,6 +60,7 @@ contract GameContract {
   // 2. Join game (deposit, hand)
   function joinGame(uint256 _gameId, uint256 _hand) public payable {
     Game memory _game = games[_gameId];
+    require(_game.hostPlayer != msg.sender);
     require(_game.depositAmount == msg.value);
     require(_game.gameStatus == 0);
     _game.guestPlayer = msg.sender;

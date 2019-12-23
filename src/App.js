@@ -75,11 +75,10 @@ class App extends Component {
   }
 
   joinGame = async (game) => {
-    const depositAmount = web3.utils.toWei((game.depositAmount).toString(), 'ether')
-    await this.state.game.methods.joinGame(game.gameId, this.guestHand.value).select({ from: this.state.account, value: depositAmount})
+    await this.state.gameContract.methods.joinGame(game.gameId, this.guestHand.value).send({ from: this.state.account, value: game.depositAmount})
     .once('receipt', async (receipt) => { 
       console.log(receipt)
-      const game = await this.state.gameContract.methods.getGameInfo(Number(receipt.events.CreatedGame.returnValues.gameId)).call()
+      const game = await this.state.gameContract.methods.getGameInfo(game.gameId).call()
       this.setState({
         joinedGames: [...this.state.joinedGames, game]
       })
@@ -121,8 +120,8 @@ class App extends Component {
           </button>
         </div>
         <div className="game-list">
-          <Tabs defaultActiveKey="profile" id="uncontrolled-tab-example">
-            <Tab eventKey="home" title="Open Game List">
+          <Tabs defaultActiveKey="openGame">
+            <Tab eventKey="openGame" title="Open Game List">
             { this.state.openGames !== [] ? 
               <>
                 { this.state.openGames.map((game, key) => {
@@ -152,7 +151,7 @@ class App extends Component {
               </> : <>
             </>}
             </Tab>
-            <Tab eventKey="profile" title="Hosted Game List">
+            <Tab eventKey="hostGame" title="Hosted Game List">
               { this.state.hostedGames !== [] ? 
                 <>
                   { this.state.hostedGames.map((game, key) => {
@@ -184,7 +183,7 @@ class App extends Component {
                 </> : <>
               </>}
             </Tab>
-            <Tab eventKey="contact" title="Joined Game List">
+            <Tab eventKey="guestGame" title="Joined Game List">
               { this.state.joinedGames !== [] ? 
                 <>
                   { this.state.joinedGames.map((game, key) => {
@@ -198,7 +197,7 @@ class App extends Component {
                         </span>
                         {(() => {
                           if (game.gameStatus == 1)
-                          return <p>Waiting host response</p>
+                          return <span className="status">Waiting host response</span>
                           else if (game.gameStatus == 2)
                           return <p>Draw</p>
                           else if (game.gameStatus == 3)
