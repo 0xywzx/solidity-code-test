@@ -76,45 +76,44 @@ class App extends Component {
 
   joinGame = async (game, key) => {
     const guestHand = 'guestHand' + key
-    console.log(game.gameId, this.state[guestHand])
-
-    // await this.state.gameContract.methods.joinGame(game.gameId, this.guestHand.value).send({ from: this.state.account, value: game.depositAmount})
-    // .once('receipt', async (receipt) => { 
-    //   console.log(receipt)
-    // })
-    // const gameInfo = await this.state.gameContract.methods.getGameInfo(game.gameId).call()
-    // this.setState({
-    //   joinedGames: [...this.state.joinedGames, gameInfo]
-    // })
-    // const openGamesArrey = this.state.openGames
-    // await openGamesArrey.some(function(v, i) {
-    //   if (v.gameId == game.gameId) {
-    //     openGamesArrey.splice(i, 1)
-    //   } 
-    // })
-    // await this.setState({
-    //   openGames: openGamesArrey
-    // })
+    await this.state.gameContract.methods.joinGame(game.gameId, this.state[guestHand]).send({ from: this.state.account, value: game.depositAmount})
+    .once('receipt', async (receipt) => { 
+      console.log(receipt)
+    })
+    const gameInfo = await this.state.gameContract.methods.getGameInfo(game.gameId).call()
+    this.setState({
+      joinedGames: [...this.state.joinedGames, gameInfo]
+    })
+    const openGamesArrey = this.state.openGames
+    await openGamesArrey.some(function(v, i) {
+      if (v.gameId == game.gameId) {
+        openGamesArrey.splice(i, 1)
+      } 
+    })
+    await this.setState({
+      openGames: openGamesArrey
+    })
   }
 
-  showResult = async (game) => {
-    console.log(game.gameId, this.showResultHand.value, this.showResultPassward.value)
-    // await this.state.gameContract.methods.gameResult(game.gameId, this.showResultHand.value, this.showResultPassward.value).send({ from: this.state.account})
-    // .once('receipt', async (receipt) => { 
-    //   console.log(receipt)
-    // })
-    // const gameInfo = await this.state.gameContract.methods.getGameInfo(game.gameId).call()
-    // const hostedGamesArrey = await this.state.hostedGames
-    // hostedGamesArrey.some(function(v, i) {
-    //   if (v.gameId == gameInfo.gameId) {
-    //     hostedGamesArrey.splice(i, 1)
-    //     hostedGamesArrey.push(gameInfo)
-    //     hostedGamesArrey.sort((a, b) => a.game - b.game)
-    //   } 
-    // })
-    // await this.setState({
-    //   hostedGames: hostedGamesArrey
-    // })
+  showResult = async (game, key) => {
+    const showResultHand = 'showResultHand' + key
+    const showResultPassward = 'showResultPassward' + key
+    await this.state.gameContract.methods.gameResult(game.gameId, this.state[showResultHand], this.state[showResultPassward]).send({ from: this.state.account})
+    .once('receipt', async (receipt) => { 
+      console.log(receipt)
+    })
+    const gameInfo = await this.state.gameContract.methods.getGameInfo(game.gameId).call()
+    const hostedGamesArrey = await this.state.hostedGames
+    hostedGamesArrey.some(function(v, i) {
+      if (v.gameId == gameInfo.gameId) {
+        hostedGamesArrey.splice(i, 1)
+        hostedGamesArrey.push(gameInfo)
+        hostedGamesArrey.sort((a, b) => a.game - b.game)
+      } 
+    })
+    await this.setState({
+      hostedGames: hostedGamesArrey
+    })
   }
 
   getEtherFromWinner = async (game) => {
@@ -188,6 +187,7 @@ class App extends Component {
                       <span>
                         Hand :
                         <select onChange={async(e) => await this.setState({ [guestHand] : e.target.value }) }>
+                          <option value="--">Choose hand</option>
                           <option value="0" >Rock</option>
                           <option value="1">Scissors</option>
                           <option value="2">Paper</option>
@@ -207,6 +207,8 @@ class App extends Component {
               { this.state.hostedGames !== [] ? 
                 <>
                   { this.state.hostedGames.map((game, key) => {
+                    const showResultHand = 'showResultHand' + key
+                    const showResultPassward = 'showResultPassward' + key
                     return(
                       <div className="game-item" key={key}>
                         <span>
@@ -224,7 +226,8 @@ class App extends Component {
                             <span>Type same hand and passward</span><br/>
                             <span>
                               Hand :
-                              <select ref={(input) => { this.showResultHand = input }}>>
+                              <select onChange={async(e) => await this.setState({ [showResultHand] : e.target.value }) }>
+                                <option value="--">Choose hand</option>
                                 <option value="0" >Rock</option>
                                 <option value="1">Scissors</option>
                                 <option value="2">Paper</option>
@@ -232,12 +235,11 @@ class App extends Component {
                             </span>
                             <span>
                               Passward : 
-                              <input type="texr" placeholder=""
-                                ref={(input) => { this.showResultPassward = input }}>
+                              <input type="text" onChange={async(e) => await this.setState({ [showResultPassward] : e.target.value }) }>
                               </input>
                             </span>
                             <button
-                              onClick={(e) => { this.showResult(game) }}>
+                              onClick={(e) => { this.showResult(game, key) }}>
                               Show result
                             </button>
                           </>
