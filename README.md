@@ -1,3 +1,6 @@
+# Solidity code test
+
+## Directory structure
 .
 ├── README.md
 ├── contracts
@@ -11,15 +14,12 @@
 ├── src
 │   ├── App.css
 │   ├── App.js
-│   ├── App.test.js
 │   ├── abis
 │   │   ├── GameContract.json
 │   │   └── Migrations.json
 │   ├── index.css
 │   ├── index.js
-│   ├── logo.svg
 │   ├── serviceWorker.js
-│   ├── setupTests.js
 │   └── web3.js
 ├── test
 │   └── GameContract.test.js
