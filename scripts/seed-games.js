@@ -30,7 +30,7 @@ module.exports = async function(callback) {
 
     //create 1st game
     hand = 0
-    passward = "password"
+    passward = "passward"
     depositAmount = 1
     await gameContract.createGame(hand, passward, { from: user1, value: web3.utils.toWei(depositAmount.toString())})
     console.log(`Created 1st game from ${user1}`)
@@ -38,11 +38,52 @@ module.exports = async function(callback) {
 
     //create 2nd game
     hand = 1
-    passward = "password"
+    passward = "passward"
     depositAmount = 2
     await gameContract.createGame(hand, passward, { from: user2, value: web3.utils.toWei(depositAmount.toString())})
     console.log(`Created 2nd game from ${user2}`)
     await wait(1)
+
+    //create 3rd game
+    hand = 1
+    passward = "passward"
+    depositAmount = 1
+    await gameContract.createGame(hand, passward, { from: user2, value: web3.utils.toWei(depositAmount.toString())})
+    console.log(`Created 3rd game from ${user2}`)
+    await wait(1)
+
+    //create 4th game
+    hand = 2
+    passward = "passward"
+    depositAmount = 2
+    await gameContract.createGame(hand, passward, { from: user3, value: web3.utils.toWei(depositAmount.toString())})
+    console.log(`Created 4th game from ${user3}`)
+    await wait(1)
+
+    //create 5th game
+    hand = 2
+    passward = "passward"
+    depositAmount = 1
+    await gameContract.createGame(hand, passward, { from: user1, value: web3.utils.toWei(depositAmount.toString())})
+    console.log(`Created 5th game from ${user3}`)
+    await wait(1)
+
+    //create 6th game
+    hand = 0
+    passward = "passward"
+    depositAmount = 1
+    await gameContract.createGame(hand, passward, { from: user1, value: web3.utils.toWei(depositAmount.toString())})
+    console.log(`Created 6th game from ${user1}`)
+    await wait(1)
+
+    //create 7th game
+    hand = 1
+    passward = "passward"
+    depositAmount = 2
+    await gameContract.createGame(hand, passward, { from: user2, value: web3.utils.toWei(depositAmount.toString())})
+    console.log(`Created 7th game from ${user2}`)
+    await wait(1)
+    
 
   } catch(error) {
     console.log(error)
