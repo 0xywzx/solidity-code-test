@@ -9,6 +9,8 @@ contract GameContract {
   address constant temporalGuestPlayer = address(1);
   mapping(uint256 => Game) private games;
   
+  // hand 0: rock, 1: Scissors, 2: paper
+  // game status 0: game created, 1:guest joined, 2:draw game, 3: host is winner, 4: guest is winner, 5: game closed, 6: host withdrawed ether from a draw game, 7: host withdrawed ether from a draw game
   struct Game {
     uint256 gameId;
     address hostPlayer;
@@ -26,7 +28,7 @@ contract GameContract {
     owner = msg.sender;
   }
 
-  // create game (deposit, hand, )
+  // 1. create game (deposit ether, hand will be encrypted with passward)
   function createGame(uint256 _hand, string memory _passward) public payable {
     gameId = gameId + 1;
     bytes32 _hostPlayerHand = keccak256(abi.encodePacked(_hand, _passward));
@@ -40,14 +42,13 @@ contract GameContract {
   }
 
   function withdraw(uint256 _amount) private {
-
     msg.sender.transfer(_amount);
 	}
 
+  // **1** when no guest joined
   function closeGame(uint256 _gameId) public {
     Game memory _game = games[_gameId];
     require(_game.gameStatus == 0);
-    require(_game.guestPlayer != temporalGuestPlayer);
     require(_game.hostPlayer == msg.sender);
     require(_game.lastUpdatedTime > now - 1 hours);
     require(balanceOf[_game.hostPlayer][_gameId] >= _game.depositAmount);
@@ -56,7 +57,7 @@ contract GameContract {
     games[_gameId] = _game;
   }
 
-  // Join game (deposit, hand)
+  // 2. Join game (deposit, hand)
   function joinGame(uint256 _gameId, uint256 _hand) public payable {
     Game memory _game = games[_gameId];
     require(_game.depositAmount == msg.value);
@@ -65,10 +66,11 @@ contract GameContract {
     _game.guestPlayerHand = _hand;
     _game.gameStatus = 1;
     _game.lastUpdatedTime = now;
-    games[_gameId] = _game;
     deposit(_gameId);
+    games[_gameId] = _game;
   }
 
+  // **2** when host player has no response
   function closeGameByGuest(uint256 _gameId) public {
     Game memory _game = games[_gameId];
     require(_game.gameStatus == 1);
@@ -80,7 +82,7 @@ contract GameContract {
     games[_gameId] = _game;
   }
 
-  // 答え合わせ
+  // 3. show game result
   function gameResult(uint256 _gameId, uint256 _hand, string memory _passward) public {
     Game memory _game = games[_gameId];
     require(_game.hostPlayer == msg.sender);
@@ -100,22 +102,29 @@ contract GameContract {
     games[_gameId] = _game;
   }
 
-  function getDepositedEther(uint256 _gameId) public payable {
+  // 4-1. get ether from winner
+  function getDepositedEtherFromWinner(uint256 _gameId) public payable {
     Game memory _game = games[_gameId];
-    require(_game.gameStatus >= 2);
-    if (_game.gameStatus == 3) {
-      require(_game.hostPlayer == msg.sender);
-      require(balanceOf[msg.sender][_gameId] >= _game.depositAmount*2);
-    } else if (_game.gameStatus == 4) {
-      require(_game.guestPlayer == msg.sender);
-      require(balanceOf[msg.sender][_gameId] >= _game.depositAmount*2);
-    } else {
-      require(balanceOf[msg.sender][_gameId] >= _game.depositAmount);
-    }
-    balanceOf[msg.sender][_gameId] = 0;
+    require((_game.gameStatus == 3 && _game.hostPlayer == msg.sender) || (_game.gameStatus == 4) && (_game.guestPlayer == msg.sender)); 
+    require(balanceOf[msg.sender][_gameId] >= _game.depositAmount*2);
     withdraw(balanceOf[msg.sender][_gameId]);
+    balanceOf[msg.sender][_gameId] = 0;
     _game.gameStatus = 5;
     games[_gameId] = _game;
+  }
+
+  // 4-2. get deposited ether from a draw game
+  function getDepositedEther(uint256 _gameId) public payable {
+    Game memory _game = games[_gameId];
+    require(_game.gameStatus == 2);
+    require((_game.hostPlayer == msg.sender) || (_game.guestPlayer == msg.sender)); 
+    require(balanceOf[msg.sender][_gameId] >= _game.depositAmount);
+    withdraw(balanceOf[msg.sender][_gameId]);
+    balanceOf[msg.sender][_gameId] = 0;
+    if(balanceOf[_game.hostPlayer][_gameId] == 0 && balanceOf[_game.guestPlayer][_gameId] == 0) {
+      _game.gameStatus = 5;
+      games[_gameId] = _game;
+    }
   }
 
   function getGameInfo(uint256 _gameId) external view returns (Game memory) {
