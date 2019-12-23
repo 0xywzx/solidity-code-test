@@ -90,9 +90,14 @@ contract('TraceableToken', ([deployer, user1, user2]) => {
           
           describe('get deposited ether', () => {
             describe('success', async() => {
+              beforeEach(async () => {
+                result = await contract.getDepositedEtherFromWinner(1, {from: user1})
+              })
               it('host player successfully withdrow deposited ether', async() => {
-                result = await contract.getDepositedEther(1, {from: user1})
-                
+                result = await contract.getGameInfo(1, {from: deployer})
+                result.gameStatus.toString().should.equal("5", 'game status is correct')
+                result = await contract.balanceOf(user1, gameId)
+                result.toString().should.equal("0", 'deposited balance is correct')
               })
             })
   
@@ -136,8 +141,17 @@ contract('TraceableToken', ([deployer, user1, user2]) => {
           
           describe('get deposited ether', () => {
             describe('success', async() => {
-              it('')
+              beforeEach(async () => {
+                result = await contract.getDepositedEtherFromWinner(1, {from: user2})
+              })
+              it('host player successfully withdrow deposited ether', async() => {
+                result = await contract.getGameInfo(1, {from: deployer})
+                result.gameStatus.toString().should.equal("5", 'game status is correct')
+                result = await contract.balanceOf(user2, gameId)
+                result.toString().should.equal("0", 'deposited balance is correct')
+              })
             })
+
   
             describe('failure', async() => {
               // not host player
@@ -166,19 +180,52 @@ contract('TraceableToken', ([deployer, user1, user2]) => {
             result = await contract.gameResult(gameId, hand, passward, {from: user1})
           })
 
-          it('guest player successfully won the game', async() => {
+          it('successfully drwa the game', async() => {
             result = await contract.getGameInfo(1, {from: deployer})
             result.gameStatus.toString().should.equal("2", 'game status is correct')
             let depositedEther = result.depositAmount
             result = await contract.balanceOf(user1, gameId)
             result.toString().should.equal(depositedEther.toString(), 'deposited amount is correct')
             result = await contract.balanceOf(user2, gameId)
-            result.toString().should.equal(depositedEther, 'deposited amount is correct')
+            result.toString().should.equal(depositedEther.toString(), 'deposited amount is correct')
           })
           
           describe('get deposited ether', () => {
             describe('success', async() => {
-              it('')
+              it('successfully get deposited ether (host → guest)', async () => {
+                // withdraw from host 
+                result = await contract.getDepositedEther(1, {from: user1})
+                result = await contract.getGameInfo(1, {from: deployer})
+                result.gameStatus.toString().should.equal("2", 'game status is correct')
+                let depositedEther = result.depositAmount
+                result = await contract.balanceOf(user1, gameId)
+                result.toString().should.equal("0", 'deposited balance is correct')
+                result = await contract.balanceOf(user2, gameId)
+                result.toString().should.equal(depositedEther.toString(), 'deposited amount is correct')
+                // withdraw from guest
+                result = await contract.getDepositedEther(1, {from: user2})
+                result = await contract.getGameInfo(1, {from: deployer})
+                result.gameStatus.toString().should.equal("5", 'game status is correct')
+                result = await contract.balanceOf(user2, gameId)
+                result.toString().should.equal("0", 'deposited balance is correct')
+              })
+              it('successfully get deposited ether (guest → host)', async () => {
+                // withdraw from guest
+                result = await contract.getDepositedEther(1, {from: user2})
+                result = await contract.getGameInfo(1, {from: deployer})
+                result.gameStatus.toString().should.equal("2", 'game status is correct')
+                let depositedEther = result.depositAmount
+                result = await contract.balanceOf(user1, gameId)
+                result.toString().should.equal(depositedEther.toString(), 'deposited balance is correct')
+                result = await contract.balanceOf(user2, gameId)
+                result.toString().should.equal("0", 'deposited balnace is correct')
+                // withdraw from host
+                result = await contract.getDepositedEther(1, {from: user1})
+                result = await contract.getGameInfo(1, {from: deployer})
+                result.gameStatus.toString().should.equal("5", 'game status is correct')
+                result = await contract.balanceOf(user1, gameId)
+                result.toString().should.equal("0", 'deposited balance is correct')
+              })
             })
   
             describe('failure', async() => {
