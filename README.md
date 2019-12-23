@@ -10,11 +10,11 @@
 │   ├── 1_initial_migration.js
 │   └── 2_gameContract_migration.js
 ├── scripts
-│   └── seed-games.js
+│   └── seed-games.js (to generete seed data)
 ├── src
 │   ├── App.css
 │   ├── App.js
-│   ├── abis
+│   ├── abis (constract json file)
 │   │   ├── GameContract.json
 │   │   └── Migrations.json
 │   ├── index.css
