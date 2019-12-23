@@ -32,19 +32,20 @@ class App extends Component {
     if (currentGameId >= 1) {
       for (var i = 1; i <= currentGameId; i++) {
         const game = await this.state.gameContract.methods.getGameInfo(i).call()
-        if (game.hostPlayer == this.state.account) {
+        if (game.gameStatus == 0) {
           this.setState({
-            hostedGames: [...this.state.hostedGames, game]
+            openGames: [...this.state.openGames, game]
           })
+          if (game.hostPlayer == this.state.account) {
+            this.setState({
+              hostedGames: [...this.state.hostedGames, game]
+            })
+          }
         } else if (game.guestPlayer == this.state.account) {
           this.setState({
             joinedGames: [...this.state.joinedGames, game]
           })
-        } else if (game.guestPlayer == this.state.account) {
-          this.setState({
-            openGames: [...this.state.openGames, game]
-          })
-        }
+        }  
       }
     }
   }
@@ -58,18 +59,31 @@ class App extends Component {
       openGames: []
     }
     this.createGame = this.createGame.bind(this)
+    this.joinGame = this.joinGame.bind(this)
   }
 
   createGame = async () => {
-    console.log(this.hand.value)
-    // await this.state.gameContract.methods.createGame(0, this.passward.value).send({ from: this.state.account, value: this.deposit.value})
-    // .once('receipt', async (receipt) => { 
-    //   console.log(receipt)
-    //   const game = await this.state.gameContract.methods.getGameInfo(Number(receipt.events.CreatedGame.returnValues.gameId)).call()
-    //   this.setState({
-    //     hostedGames: [...this.state.hostedGames, game]
-    //   })
-    // })
+    const depositAmount = web3.utils.toWei((this.deposit.value).toString(), 'ether')
+    await this.state.gameContract.methods.createGame(0, this.passward.value).send({ from: this.state.account, value: depositAmount})
+    .once('receipt', async (receipt) => { 
+      console.log(receipt)
+      const game = await this.state.gameContract.methods.getGameInfo(Number(receipt.events.CreatedGame.returnValues.gameId)).call()
+      this.setState({
+        hostedGames: [...this.state.hostedGames, game]
+      })
+    })
+  }
+
+  joinGame = async (game) => {
+    const depositAmount = web3.utils.toWei((game.depositAmount).toString(), 'ether')
+    await this.state.game.methods.joinGame(game.gameId, this.guestHand.value).select({ from: this.state.account, value: depositAmount})
+    .once('receipt', async (receipt) => { 
+      console.log(receipt)
+      const game = await this.state.gameContract.methods.getGameInfo(Number(receipt.events.CreatedGame.returnValues.gameId)).call()
+      this.setState({
+        joinedGames: [...this.state.joinedGames, game]
+      })
+    })
   }
 
   render() {
@@ -120,6 +134,18 @@ class App extends Component {
                       <span>
                         Ether: {web3.utils.fromWei(game.depositAmount, 'ether')}
                       </span>
+                      <span>
+                        Hand :
+                        <select ref={(input) => { this.guestHand = input }}>>
+                          <option value="0" >Rock</option>
+                          <option value="1">Scissors</option>
+                          <option value="2">Paper</option>
+                        </select>
+                      </span>
+                      <button
+                        onClick={(e) => { this.joinGame(game) }}>
+                        Join Game
+                      </button>
                     </div>
                   )
                 })}
