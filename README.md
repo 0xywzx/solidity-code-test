@@ -1,26 +1,26 @@
 # Solidity code test
 
 ## Directory structure
-.
-├── README.md
-├── contracts
-│   ├── GameContract.sol
-│   └── Migrations.sol
-├── migrations
-│   ├── 1_initial_migration.js
-│   └── 2_gameContract_migration.js
-├── scripts
-│   └── seed-games.js (to generete seed data)
-├── src
-│   ├── App.css
-│   ├── App.js
-│   ├── abis (constract json file)
-│   │   ├── GameContract.json
-│   │   └── Migrations.json
-│   ├── index.css
-│   ├── index.js
-│   ├── serviceWorker.js
-│   └── web3.js
-├── test
-│   └── GameContract.test.js
-└── truffle-config.js
+.<br />
+├── README.md<br />
+├── contracts<br />
+│   ├── GameContract.sol<br />
+│   └── Migrations.sol<br />
+├── migrations<br />
+│   ├── 1_initial_migration.js<br />
+│   └── 2_gameContract_migration.js<br />
+├── scripts<br />
+│   └── seed-games.js (to generete seed data)<br />
+├── src<br />
+│   ├── App.css<br />
+│   ├── App.js<br />
+│   ├── abis (constract json file)<br />
+│   │   ├── GameContract.json<br />
+│   │   └── Migrations.json<br />
+│   ├── index.css<br />
+│   ├── index.js<br />
+│   ├── serviceWorker.js<br />
+│   └── web3.js<br />
+├── test<br />
+│   └── GameContract.test.js<br />
+└── truffle-config.js<br />
