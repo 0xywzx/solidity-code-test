@@ -266,13 +266,13 @@ class App extends Component {
                         </span>
                         {(() => {
                           if (game.gameStatus == 0)
-                          return <span>Waiting guset</span>
+                          return <span className="status-waiting-guest">Waiting guset</span>
                           else if (game.gameStatus == 1)
                           return <>
-                            <span>Guset Joined</span>
-                            <span>Type same hand and passward</span><br/>
+                            <span className="status-guest-joined">Guset Joined</span><br />
+                            <span className="instruction">Choose same hand and tye same passward</span><br />
                             <span>
-                              Hand :
+                              Hand : 
                               <select onChange={async(e) => await this.setState({ [showResultHand] : e.target.value }) }>
                                 <option value="--">Choose hand</option>
                                 <option value="0" >Rock</option>
@@ -291,10 +291,10 @@ class App extends Component {
                             </button>
                           </>
                           else if (game.gameStatus == 2 && this.state.gameContract.methods.balanceOf(game.gameId, this.state.account) == 0)
-                          return <span>End</span>
+                          return <span className="status-end">End</span>
                           else if (game.gameStatus == 2)
                           return <>
-                            <span>draw</span>
+                            <span className="status-draw">draw</span>
                             <button
                               onClick={(e) => { this.getEther(game) }}>
                               Get ether
@@ -302,16 +302,16 @@ class App extends Component {
                           </>
                           else if (game.gameStatus == 3)
                           return <>
-                            <span>You win!</span>
+                            <span className="status-win">You win!</span>
                             <button
                               onClick={(e) => { this.getEtherFromWinner(game) }}>
                               Get ether
                             </button>
                           </>  
                           else if (game.gameStatus == 4)
-                          return <span>You lose</span>
+                          return <span className="status-lose">You lose</span>
                           else 
-                          return <span>End</span>
+                          return <span className="status-end">End</span>
                         })()}
                       </div>
                     )
@@ -333,7 +333,7 @@ class App extends Component {
                         </span>
                         {(() => {
                           if (game.gameStatus == 1)
-                          return <span className="status">Waiting host response</span>
+                          return <span className="status-waiting-response">Waiting host response</span>
                           else if (game.gameStatus == 2 && this.state.gameContract.methods.balanceOf(game.gameId, this.state.account) == 0)
                           return <span>End</span>
                           else if (game.gameStatus == 2)
@@ -345,17 +345,17 @@ class App extends Component {
                             </button>
                           </>
                           else if (game.gameStatus == 3)
-                          return <span>You lose</span>
+                          return <span className="status-lose">You lose</span>
                           else if (game.gameStatus == 4)
                           return <>
-                            <span>You win!</span>
+                            <span className="status-win">You win!</span>
                             <button
                               onClick={(e) => { this.getEtherFromWinner(game) }}>
                               Get ether
                             </button>
                           </>  
                           else if (game.gameStatus == 5)
-                          return <span>End</span>
+                          return <span className="status-end">End</span>
                         })()}
                       </div>
                     )
