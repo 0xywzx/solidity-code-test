@@ -5,7 +5,7 @@ require('chai')
   .use(require('chai-as-promised'))
   .should() 
 
-contract('TraceableToken', ([deployer, user1, user2]) => {
+contract('TraceableToken', ([deployer, user1, user2, user3]) => {
   beforeEach(async () => {
     contract = await Contract.new()
   })
@@ -13,7 +13,7 @@ contract('TraceableToken', ([deployer, user1, user2]) => {
   describe('game contract', () => {
     let gameId
     let hand
-    let passward
+    let password
     let depositAmount
     let result
     let createGameResult
@@ -21,9 +21,9 @@ contract('TraceableToken', ([deployer, user1, user2]) => {
     beforeEach(async () => {
       gameId = 1
       hand = 0
-      passward = "passward"
+      password = "password"
       depositAmount = 2
-      await contract.createGame(hand, passward, {from: user1, value: web3.utils.toWei(depositAmount.toString(), 'ether')})
+      await contract.createGame(hand, password, {from: user1, value: web3.utils.toWei(depositAmount.toString(), 'ether')})
     })
 
     it('host player created first game', async () => {
@@ -36,7 +36,7 @@ contract('TraceableToken', ([deployer, user1, user2]) => {
     })
 
     describe('when no guset joind', () => {
-      
+      // test from frontend
     })
 
     describe('guest player join game', () => {
@@ -57,13 +57,16 @@ contract('TraceableToken', ([deployer, user1, user2]) => {
         })
 
         describe('when host player has no response', () => {
-  
+          // test from frontend
         })
       })
       describe('failure', async() => {
-        // deposit amount
-        // gamestatus
-        // ？？ guset player address ...
+        it('host player can not join hosted game', async () => {
+          await contract.joinGame(gameId, hand, {from: user1, value: web3.utils.toWei(depositAmount.toString(), 'ether')}).should.be.rejected
+        })
+        it('insufficient deposit amount', async () => {
+          await contract.joinGame(gameId, hand, {from: user1, value: web3.utils.toWei('1', 'ether')}).should.be.rejected
+        })
       })
 
       describe('host player won the game', () => {
@@ -74,8 +77,8 @@ contract('TraceableToken', ([deployer, user1, user2]) => {
             hand = 1
             await contract.joinGame(gameId, hand, {from: user2, value: web3.utils.toWei(depositAmount.toString(), 'ether')})
             hand = 0
-            passward = "passward"
-            result = await contract.gameResult(gameId, hand, passward, {from: user1})
+            password = "password"
+            result = await contract.gameResult(gameId, hand, password, {from: user1})
           })
 
           it('host player successfully won the game', async() => {
@@ -102,19 +105,24 @@ contract('TraceableToken', ([deployer, user1, user2]) => {
             })
   
             describe('failure', async() => {
-              // not host player
-              // hand & password do not match
-              // game status
+              it('get ether from loser', async () => {
+                result = await contract.getDepositedEtherFromWinner(1, {from: user2}).should.be.rejected
+              })
             })
-
           })
           
         })
 
         describe('failure', async() => {
-          // not host player
-          // hand & password do not match
-          // game status
+          it('not host player', async () => {
+            await contract.gameResult(gameId, hand, password, {from: user2}).should.be.rejected
+          })
+          it('hand does not match', async () => {
+            await contract.gameResult(gameId, 2, password, {from: user1}).should.be.rejected
+          })
+          it('hand does not match', async () => {
+            await contract.gameResult(gameId, hand, "wrong password", {from: user1}).should.be.rejected
+          })
         })
       })
 
@@ -125,8 +133,8 @@ contract('TraceableToken', ([deployer, user1, user2]) => {
             hand = 2
             await contract.joinGame(gameId, hand, {from: user2, value: web3.utils.toWei(depositAmount.toString(), 'ether')})
             hand = 0
-            passward = "passward"
-            result = await contract.gameResult(gameId, hand, passward, {from: user1})
+            password = "password"
+            result = await contract.gameResult(gameId, hand, password, {from: user1})
           })
 
           it('guest player successfully won the game', async() => {
@@ -152,20 +160,13 @@ contract('TraceableToken', ([deployer, user1, user2]) => {
               })
             })
 
-  
             describe('failure', async() => {
-              // not host player
-              // hand & password do not match
-              // game status
+              it('get ether from loser', async () => {
+                result = await contract.getDepositedEtherFromWinner(1, {from: user1}).should.be.rejected
+              })
             })
           })
 
-        })
-
-        describe('failure', async() => {
-          // not host player
-          // hand & password do not match
-          // game status
         })
       })
 
@@ -176,8 +177,8 @@ contract('TraceableToken', ([deployer, user1, user2]) => {
             hand = 0
             await contract.joinGame(gameId, hand, {from: user2, value: web3.utils.toWei(depositAmount.toString(), 'ether')})
             hand = 0
-            passward = "passward"
-            result = await contract.gameResult(gameId, hand, passward, {from: user1})
+            password = "password"
+            result = await contract.gameResult(gameId, hand, password, {from: user1})
           })
 
           it('successfully drwa the game', async() => {
@@ -229,9 +230,9 @@ contract('TraceableToken', ([deployer, user1, user2]) => {
             })
   
             describe('failure', async() => {
-              // not host player
-              // hand & password do not match
-              // game status
+              it('get ether from 3rd party', async () => {
+                result = await contract.getDepositedEther(1, {from: user3}).should.be.rejected
+              })
             })
           })
 
