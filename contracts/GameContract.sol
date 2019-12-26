@@ -50,7 +50,7 @@ contract GameContract {
     Game memory _game = games[_gameId];
     require(_game.gameStatus == 0);
     require(_game.hostPlayer == msg.sender);
-    require(_game.lastUpdatedTime > now - 1 hours);
+    require(now - 5 minutes > _game.lastUpdatedTime);
     require(balanceOf[_game.hostPlayer][_gameId] >= _game.depositAmount);
     withdraw(_game.depositAmount);
     _game.gameStatus = 5;

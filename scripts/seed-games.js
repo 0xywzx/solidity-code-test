@@ -61,11 +61,11 @@ module.exports = async function(callback) {
     await wait(1)
 
     //create 5th game
-    hand = 2
+    hand = 0
     passward = "passward"
     depositAmount = 1
     await gameContract.createGame(hand, passward, { from: user1, value: web3.utils.toWei(depositAmount.toString())})
-    console.log(`Created 5th game from ${user3}`)
+    console.log(`Created 5th game from ${user1}`)
     await wait(1)
 
     //create 6th game

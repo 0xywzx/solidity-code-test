@@ -48,8 +48,12 @@
   padding-right: 15px;
 }
 
+.game-item button {
+  margin-left: 10px;
+}
+
 .game-item span select {
-  padding-left: 15px;
+  margin-left: 5px;
 }
 
 .status-waiting-guest {

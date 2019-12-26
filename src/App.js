@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.css'
 import web3 from './web3.js'
+import etherIcon from './images/ether.png'
 import GameContract from './abis/GameContract.json'
 import Tabs from 'react-bootstrap/Tabs'
 import Tab from 'react-bootstrap/Tab'
@@ -33,10 +34,22 @@ class App extends Component {
       for (var i = 1; i <= currentGameId; i++) {
         const game = await this.state.gameContract.methods.getGameInfo(i).call()
         if (game.hostPlayer == this.state.account) {
+          if (game.gameStatus == 2) {
+            const balance = await this.state.gameContract.methods.balanceOf(this.state.account, game.gameId).call()
+            if (balance == 0) {
+              game.gameStatus = 5
+            }
+          }
           this.setState({
             hostedGames: [...this.state.hostedGames, game]
           })
         } else if (game.guestPlayer == this.state.account) {
+          if (game.gameStatus == 2) {
+            const balance = await this.state.gameContract.methods.balanceOf(this.state.account, game.gameId).call()
+            if (balance == 0) {
+              game.gameStatus = 5
+            }
+          }
           this.setState({
             joinedGames: [...this.state.joinedGames, game]
           })
@@ -91,7 +104,8 @@ class App extends Component {
       } 
     })
     await this.setState({
-      openGames: openGamesArrey
+      openGames: openGamesArrey,
+      [guestHand]: '--'
     })
   }
 
@@ -114,6 +128,8 @@ class App extends Component {
     await this.setState({
       hostedGames: hostedGamesArrey
     })
+    this.state[showResultHand] = ''
+    this.state[showResultPassward] = ''
   }
 
   getEtherFromWinner = async (game) => {
@@ -128,7 +144,7 @@ class App extends Component {
         if (v.gameId == gameInfo.gameId) {
           hostedGamesArrey.splice(i, 1)
           hostedGamesArrey.push(gameInfo)
-          hostedGamesArrey.sort((a, b) => a.game - b.game)
+          hostedGamesArrey.sort((a, b) => a.gameId - b.gameId)
         } 
       })
       await this.setState({
@@ -159,9 +175,10 @@ class App extends Component {
       const hostedGamesArrey = await this.state.hostedGames
       await hostedGamesArrey.some(function(v, i) {
         if (v.gameId == gameInfo.gameId) {
+          gameInfo.gameStatus = 5
           hostedGamesArrey.splice(i, 1)
           hostedGamesArrey.push(gameInfo)
-          hostedGamesArrey.sort((a, b) => a.game - b.game)
+          hostedGamesArrey.sort((a, b) => a.gameId - b.gameId)
         } 
       })
       await this.setState({
@@ -171,6 +188,7 @@ class App extends Component {
       const joinedGamesArrey = await this.state.joinedGames
       await joinedGamesArrey.some(function(v, i) {
         if (v.gameId == gameInfo.gameId) {
+          gameInfo.gameStatus = 5
           joinedGamesArrey.splice(i, 1)
           joinedGamesArrey.push(gameInfo)
           joinedGamesArrey.sort((a, b) => a.gameId - b.gameId)
@@ -180,6 +198,31 @@ class App extends Component {
         joinedGames: joinedGamesArrey
       })
     }
+  }
+
+  closeGame = async (game) => {
+    await this.state.gameContract.methods.closeGame(game.gameId).send({ from: this.state.account})
+    .once('receipt', async (receipt) => { 
+      console.log(receipt)
+    })
+    const gameInfo = await this.state.gameContract.methods.getGameInfo(game.gameId).call()
+    const openGamesArrey = this.state.openGames
+    await openGamesArrey.some(function(v, i) {
+      if (v.gameId == game.gameId) {
+        openGamesArrey.splice(i, 1)
+      } 
+    })
+    const hostedGamesArrey = await this.state.hostedGames
+    await hostedGamesArrey.some(function(v, i) {
+      if (v.gameId == gameInfo.gameId) {
+        hostedGamesArrey.splice(i, 1)
+        hostedGamesArrey.push(gameInfo)
+        hostedGamesArrey.sort((a, b) => a.gameId - b.gameId)
+      } 
+    })
+    await this.setState({
+      hostedGames: hostedGamesArrey
+    })
   }
 
   render() {
@@ -256,6 +299,9 @@ class App extends Component {
                   { this.state.hostedGames.map((game, key) => {
                     const showResultHand = 'showResultHand' + key
                     const showResultPassward = 'showResultPassward' + key
+                    const now = new Date();
+                    const lastUpdatedTime = new Date(game.lastUpdatedTime * 1000)
+                    now.setHours(now.getMinutes() - 5)
                     return(
                       <div className="game-item" key={key}>
                         <span>
@@ -265,7 +311,15 @@ class App extends Component {
                           Ether: {web3.utils.fromWei(game.depositAmount, 'ether')}
                         </span>
                         {(() => {
-                          if (game.gameStatus == 0)
+                          if (game.gameStatus == 0 && now > lastUpdatedTime) 
+                          return <>
+                            <span className="status-end">No guest joined</span>
+                            <button
+                              onClick={(e) => { this.closeGame(game) }}>
+                              Close Game
+                            </button>
+                          </>
+                          else if (game.gameStatus == 0)
                           return <span className="status-waiting-guest">Waiting guset</span>
                           else if (game.gameStatus == 1)
                           return <>
@@ -323,6 +377,7 @@ class App extends Component {
               { this.state.joinedGames !== [] ? 
                 <>
                   { this.state.joinedGames.map((game, key) => {
+                    
                     return(
                       <div className="game-item" key={key}>
                         <span>
@@ -334,11 +389,11 @@ class App extends Component {
                         {(() => {
                           if (game.gameStatus == 1)
                           return <span className="status-waiting-response">Waiting host response</span>
-                          else if (game.gameStatus == 2 && this.state.gameContract.methods.balanceOf(game.gameId, this.state.account) == 0)
-                          return <span>End</span>
+                          else if (game.gameStatus == 2 && this.state.gameContract.methods.balanceOf(this.state.account, game.gameId).call() == 0)
+                          return <span className="status-end">End</span>
                           else if (game.gameStatus == 2)
                           return <>
-                            <span>draw</span>
+                            <span className="status-draw">draw</span>
                             <button
                               onClick={(e) => { this.getEther(game) }}>
                               Get ether
