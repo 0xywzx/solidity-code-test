@@ -5,7 +5,7 @@ require('chai')
   .use(require('chai-as-promised'))
   .should() 
 
-contract('TraceableToken', ([deployer, user1, user2, user3]) => {
+contract('GameContract', ([deployer, user1, user2, user3]) => {
   beforeEach(async () => {
     contract = await Contract.new()
   })
@@ -16,7 +16,6 @@ contract('TraceableToken', ([deployer, user1, user2, user3]) => {
     let password
     let depositAmount
     let result
-    let createGameResult
 
     beforeEach(async () => {
       gameId = 1
