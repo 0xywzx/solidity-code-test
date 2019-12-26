@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import './App.css';
+import './App.css'
 import 'bootstrap/dist/css/bootstrap.css'
 import web3 from './web3.js'
 import GameContract from './abis/GameContract.json'
@@ -21,7 +21,7 @@ class App extends Component {
     } catch (error) {
       alert(
         `Failed to load web3, accounts, or contract. Check console for details.`,
-      );
+      )
       console.error(error);
     }
     await this.loadGameInfo()
@@ -75,7 +75,7 @@ class App extends Component {
 
   createGame = async () => {
     const depositAmount = web3.utils.toWei((this.deposit.value).toString(), 'ether')
-    await this.state.gameContract.methods.createGame(0, this.passward.value).send({ from: this.state.account, value: depositAmount})
+    await this.state.gameContract.methods.createGame(0, this.password.value).send({ from: this.state.account, value: depositAmount})
     .once('receipt', async (receipt) => { 
       console.log(receipt)
       const game = await this.state.gameContract.methods.getGameInfo(Number(receipt.events.CreatedGame.returnValues.gameId)).call()
@@ -97,12 +97,8 @@ class App extends Component {
       joinedGames: [...this.state.joinedGames, gameInfo]
     })
     const openGamesArrey = this.state.openGames
-    await openGamesArrey.some(function(v, i) {
-      if (v.gameId === game.gameId) {
-        openGamesArrey.splice(i, 1)
-      } 
-      return openGamesArrey
-    })
+    const index = openGamesArrey.findIndex(({gameId}) => gameId === game.gameId);
+    openGamesArrey.splice(index, 1)
     await this.setState({
       openGames: openGamesArrey
     })
@@ -110,21 +106,17 @@ class App extends Component {
 
   showResult = async (game, key) => {
     const showResultHand = 'showResultHand' + key
-    const showResultPassward = 'showResultPassward' + key
-    await this.state.gameContract.methods.gameResult(game.gameId, this.state[showResultHand], this.state[showResultPassward]).send({ from: this.state.account})
+    const showResultPassword = 'showResultPassword' + key
+    await this.state.gameContract.methods.gameResult(game.gameId, this.state[showResultHand], this.state[showResultPassword]).send({ from: this.state.account})
     .once('receipt', async (receipt) => { 
       console.log(receipt)
     })
     const gameInfo = await this.state.gameContract.methods.getGameInfo(game.gameId).call()
     const hostedGamesArrey = await this.state.hostedGames
-    hostedGamesArrey.some(function(v, i) {
-      if (Number(v.gameId) === Number(gameInfo.gameId)) {
-        hostedGamesArrey.splice(i, 1)
-        hostedGamesArrey.push(gameInfo)
-        hostedGamesArrey.sort((a, b) => a.gameId - b.gameId)
-      } 
-      return hostedGamesArrey
-    })
+    const index = hostedGamesArrey.findIndex(({gameId}) => gameId === game.gameId);
+    hostedGamesArrey.splice(index, 1)
+    hostedGamesArrey.push(gameInfo)
+    hostedGamesArrey.sort((a, b) => a.gameId - b.gameId)
     await this.setState({
       hostedGames: hostedGamesArrey
     })
@@ -138,27 +130,19 @@ class App extends Component {
     const gameInfo = await this.state.gameContract.methods.getGameInfo(game.gameId).call()
     if (game.hostPlayer === this.state.account) {
       const hostedGamesArrey = await this.state.hostedGames
-      await hostedGamesArrey.some(function(v, i) {
-        if (Number(v.gameId) === Number(gameInfo.gameId)) {
-          hostedGamesArrey.splice(i, 1)
-          hostedGamesArrey.push(gameInfo)
-          hostedGamesArrey.sort((a, b) => a.gameId - b.gameId)
-        } 
-        return hostedGamesArrey
-      })
+      const index = hostedGamesArrey.findIndex(({gameId}) => gameId === game.gameId)
+      hostedGamesArrey.splice(index, 1)
+      hostedGamesArrey.push(gameInfo)
+      hostedGamesArrey.sort((a, b) => a.gameId - b.gameId)
       await this.setState({
         hostedGames: hostedGamesArrey
       })
     } else if (game.guestPlayer === this.state.account) {
       const joinedGamesArrey = await this.state.joinedGames
-      await joinedGamesArrey.some(function(v, i) {
-        if (Number(v.gameId) === Number(gameInfo.gameId)) {
-          joinedGamesArrey.splice(i, 1)
-          joinedGamesArrey.push(gameInfo)
-          joinedGamesArrey.sort((a, b) => a.gameId - b.gameId)
-        } 
-        return joinedGamesArrey
-      })
+      const index = joinedGamesArrey.findIndex(({gameId}) => gameId === game.gameId)
+      joinedGamesArrey.splice(index, 1)
+      joinedGamesArrey.push(gameInfo)
+      joinedGamesArrey.sort((a, b) => a.gameId - b.gameId)
       await this.setState({
         joinedGames: joinedGamesArrey
       })
@@ -173,29 +157,21 @@ class App extends Component {
     const gameInfo = await this.state.gameContract.methods.getGameInfo(game.gameId).call()
     if (game.hostPlayer === this.state.account) {
       const hostedGamesArrey = await this.state.hostedGames
-      await hostedGamesArrey.some(function(v, i) {
-        if (Number(v.gameId) === Number(gameInfo.gameId)) {
-          gameInfo.gameStatus = 5
-          hostedGamesArrey.splice(i, 1)
-          hostedGamesArrey.push(gameInfo)
-          hostedGamesArrey.sort((a, b) => a.gameId - b.gameId)
-        } 
-        return hostedGamesArrey
-      })
+      const index = hostedGamesArrey.findIndex(({gameId}) => gameId === game.gameId)
+      hostedGamesArrey.splice(index, 1)
+      gameInfo.gameStatus = 5
+      hostedGamesArrey.push(gameInfo)
+      hostedGamesArrey.sort((a, b) => a.gameId - b.gameId)
       await this.setState({
         hostedGames: hostedGamesArrey
       })
     } else if (game.guestPlayer === this.state.account) {
       const joinedGamesArrey = await this.state.joinedGames
-      await joinedGamesArrey.some(function(v, i) {
-        if (Number(v.gameId) === Number(gameInfo.gameId)) {
-          gameInfo.gameStatus = 5
-          joinedGamesArrey.splice(i, 1)
-          joinedGamesArrey.push(gameInfo)
-          joinedGamesArrey.sort((a, b) => a.gameId - b.gameId)
-        } 
-        return joinedGamesArrey
-      })
+      const index = joinedGamesArrey.findIndex(({gameId}) => gameId === game.gameId)
+      gameInfo.gameStatus = 5
+      joinedGamesArrey.splice(index, 1)
+      joinedGamesArrey.push(gameInfo)
+      joinedGamesArrey.sort((a, b) => a.gameId - b.gameId)
       await this.setState({
         joinedGames: joinedGamesArrey
       })
@@ -209,21 +185,16 @@ class App extends Component {
     })
     const gameInfo = await this.state.gameContract.methods.getGameInfo(game.gameId).call()
     const openGamesArrey = this.state.openGames
-    await openGamesArrey.some(function(v, i) {
-      if (v.gameId === game.gameId) {
-        openGamesArrey.splice(i, 1)
-      } 
-      return openGamesArrey
+    const indexOpenGame = await openGamesArrey.findIndex(({gameId}) => gameId === game.gameId);
+    openGamesArrey.splice(indexOpenGame, 1)
+    await this.setState({
+      openGames: openGamesArrey
     })
-    const hostedGamesArrey = await this.state.hostedGames
-    await hostedGamesArrey.some(function(v, i) {
-      if (v.gameId === gameInfo.gameId) {
-        hostedGamesArrey.splice(i, 1)
-        hostedGamesArrey.push(gameInfo)
-        hostedGamesArrey.sort((a, b) => a.gameId - b.gameId)
-      } 
-      return hostedGamesArrey
-    })
+    const hostedGamesArrey = this.state.hostedGames
+    const indexHostedGame = hostedGamesArrey.findIndex(({gameId}) => gameId === game.gameId);
+    hostedGamesArrey.splice(indexHostedGame, 1)
+    hostedGamesArrey.push(gameInfo)
+    hostedGamesArrey.sort((a, b) => a.gameId - b.gameId)
     await this.setState({
       hostedGames: hostedGamesArrey
     })
@@ -236,14 +207,10 @@ class App extends Component {
     })
     const gameInfo = await this.state.gameContract.methods.getGameInfo(game.gameId).call()
     const joinedGamesArrey = await this.state.joinedGames
-    await joinedGamesArrey.some(function(v, i) {
-      if (v.gameId === gameInfo.gameId) {
-        joinedGamesArrey.splice(i, 1)
-        joinedGamesArrey.push(gameInfo)
-        joinedGamesArrey.sort((a, b) => a.gameId - b.gameId)
-      } 
-      return joinedGamesArrey
-    })
+    const index = joinedGamesArrey.findIndex(({gameId}) => gameId === game.gameId)
+    joinedGamesArrey.splice(index, 1)
+    joinedGamesArrey.push(gameInfo)
+    joinedGamesArrey.sort((a, b) => a.gameId - b.gameId)
     await this.setState({
       joinedGames: joinedGamesArrey
     })
@@ -257,6 +224,10 @@ class App extends Component {
       </header>
       <div className="App-body">
         <div className="create-game">
+        <button
+            onClick={this.find}>
+            Create Game
+          </button>
           <h2>Create Game</h2>
           <p>
             Hand :
@@ -273,9 +244,9 @@ class App extends Component {
             </input>
           </p>
           <p>
-            Passward : 
+            Password : 
             <input type="texr" placeholder=""
-              ref={(input) => { this.passward = input }}>
+              ref={(input) => { this.password = input }}>
             </input>
           </p>
           <button
@@ -322,8 +293,8 @@ class App extends Component {
                 <>
                   { this.state.hostedGames.map((game, key) => {
                     const showResultHand = 'showResultHand' + key
-                    const showResultPassward = 'showResultPassward' + key
-                    const now = new Date();
+                    const showResultPassword = 'showResultPassword' + key
+                    const now = new Date()
                     const lastUpdatedTime = new Date(game.lastUpdatedTime * 1000)
                     now.setHours(now.getHours() - 1)
                     return(
@@ -348,7 +319,7 @@ class App extends Component {
                           else if (Number(game.gameStatus) === 1)
                           return <>
                             <span className="status-guest-joined">Guset Joined</span><br />
-                            <span className="instruction">Choose same hand and tye same passward</span><br />
+                            <span className="instruction">Choose same hand and tye same password</span><br />
                             <span>
                               Hand : 
                               <select onChange={async(e) => await this.setState({ [showResultHand] : e.target.value }) }>
@@ -359,8 +330,8 @@ class App extends Component {
                               </select>
                             </span>
                             <span>
-                              Passward : 
-                              <input type="text" onChange={async(e) => await this.setState({ [showResultPassward] : e.target.value }) }>
+                              Password : 
+                              <input type="text" onChange={async(e) => await this.setState({ [showResultPassword] : e.target.value }) }>
                               </input>
                             </span>
                             <button
@@ -399,7 +370,7 @@ class App extends Component {
               { this.state.joinedGames !== [] ? 
                 <>
                   { this.state.joinedGames.map((game, key) => {
-                    const now = new Date();
+                    const now = new Date()
                     const lastUpdatedTime = new Date(game.lastUpdatedTime * 1000)
                     now.setHours(now.getHours() - 1)
                     return(
@@ -456,4 +427,4 @@ class App extends Component {
   }
 }  
 
-export default App;
+export default App
