@@ -4,7 +4,7 @@
 Ganacheを起動しPortを`7545`に設定してください。
 
 ```
-git clone 
+git clone git@github.com:Yosuke-Aramaki/solidity-code-test.git
 cd solidity-code-test
 npm i
 truffle migrate --reset
