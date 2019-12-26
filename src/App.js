@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.css'
 import web3 from './web3.js'
-import etherIcon from './images/ether.png'
 import GameContract from './abis/GameContract.json'
 import Tabs from 'react-bootstrap/Tabs'
 import Tab from 'react-bootstrap/Tab'
@@ -225,6 +224,25 @@ class App extends Component {
     })
   }
 
+  closeGameByGuest = async (game) => {
+    await this.state.gameContract.methods.closeGameByGuest(game.gameId).send({ from: this.state.account})
+    .once('receipt', async (receipt) => { 
+      console.log(receipt)
+    })
+    const gameInfo = await this.state.gameContract.methods.getGameInfo(game.gameId).call()
+    const joinedGamesArrey = await this.state.joinedGames
+    await joinedGamesArrey.some(function(v, i) {
+      if (v.gameId == gameInfo.gameId) {
+        joinedGamesArrey.splice(i, 1)
+        joinedGamesArrey.push(gameInfo)
+        joinedGamesArrey.sort((a, b) => a.gameId - b.gameId)
+      } 
+    })
+    await this.setState({
+      joinedGames: joinedGamesArrey
+    })
+  }
+
   render() {
     return (
     <div className="App">
@@ -301,7 +319,7 @@ class App extends Component {
                     const showResultPassward = 'showResultPassward' + key
                     const now = new Date();
                     const lastUpdatedTime = new Date(game.lastUpdatedTime * 1000)
-                    now.setHours(now.getMinutes() - 5)
+                    now.setMinutes(now.getMinutes() - 5)
                     return(
                       <div className="game-item" key={key}>
                         <span>
@@ -377,7 +395,9 @@ class App extends Component {
               { this.state.joinedGames !== [] ? 
                 <>
                   { this.state.joinedGames.map((game, key) => {
-                    
+                    const now = new Date();
+                    const lastUpdatedTime = new Date(game.lastUpdatedTime * 1000)
+                    now.setMinutes(now.getMinutes() - 5)
                     return(
                       <div className="game-item" key={key}>
                         <span>
@@ -387,7 +407,15 @@ class App extends Component {
                           Ether: {web3.utils.fromWei(game.depositAmount, 'ether')}
                         </span>
                         {(() => {
-                          if (game.gameStatus == 1)
+                          if (game.gameStatus == 1 && now > lastUpdatedTime) 
+                          return <>
+                            <span className="status-end">No host response</span>
+                            <button
+                              onClick={(e) => { this.closeGameByGuest(game) }}>
+                              Close Game
+                            </button>
+                          </>
+                          else if (game.gameStatus == 1)
                           return <span className="status-waiting-response">Waiting host response</span>
                           else if (game.gameStatus == 2 && this.state.gameContract.methods.balanceOf(this.state.account, game.gameId).call() == 0)
                           return <span className="status-end">End</span>
