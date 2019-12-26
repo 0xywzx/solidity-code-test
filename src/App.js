@@ -103,8 +103,7 @@ class App extends Component {
       } 
     })
     await this.setState({
-      openGames: openGamesArrey,
-      [guestHand]: '--'
+      openGames: openGamesArrey
     })
   }
 
@@ -319,7 +318,7 @@ class App extends Component {
                     const showResultPassward = 'showResultPassward' + key
                     const now = new Date();
                     const lastUpdatedTime = new Date(game.lastUpdatedTime * 1000)
-                    now.setMinutes(now.getMinutes() - 5)
+                    now.setHours(now.getHours() - 1)
                     return(
                       <div className="game-item" key={key}>
                         <span>
@@ -397,7 +396,7 @@ class App extends Component {
                   { this.state.joinedGames.map((game, key) => {
                     const now = new Date();
                     const lastUpdatedTime = new Date(game.lastUpdatedTime * 1000)
-                    now.setMinutes(now.getMinutes() - 5)
+                    now.setHours(now.getHours() - 1)
                     return(
                       <div className="game-item" key={key}>
                         <span>
