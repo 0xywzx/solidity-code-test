@@ -89,7 +89,7 @@ module.exports = async function(callback) {
     password = "password"
     depositAmount = 1
     await gameContract.createGame(hand, password, { from: user1, value: web3.utils.toWei(depositAmount.toString())})
-    console.log(`Created 6th game from ${user1}`)
+    console.log(`Created 8th game from ${user1}`)
     await wait(1)
 
     //create 9th game
@@ -97,7 +97,7 @@ module.exports = async function(callback) {
     password = "password"
     depositAmount = 2
     await gameContract.createGame(hand, password, { from: user2, value: web3.utils.toWei(depositAmount.toString())})
-    console.log(`Created 7th game from ${user2}`)
+    console.log(`Created 9th game from ${user2}`)
     await wait(1)
     
     //create 10th game
@@ -105,7 +105,7 @@ module.exports = async function(callback) {
     password = "password"
     depositAmount = 1
     await gameContract.createGame(hand, password, { from: user1, value: web3.utils.toWei(depositAmount.toString())})
-    console.log(`Created 6th game from ${user1}`)
+    console.log(`Created 10th game from ${user1}`)
     await wait(1)
 
   } catch(error) {

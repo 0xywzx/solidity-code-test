@@ -224,10 +224,6 @@ class App extends Component {
       </header>
       <div className="App-body">
         <div className="create-game">
-        <button
-            onClick={this.find}>
-            Create Game
-          </button>
           <h2>Create Game</h2>
           <p>
             Hand :
