@@ -16,6 +16,13 @@ npm run start
 npm install -g truffle@5.0.7
 ```
 
+* nodeとnpmは下記のバージョンを利用してます。
+```
+node: v11.14.0
+npm: v6.7.0
+```
+
+
 ## 動作確認手順
 
 じゃんけんゲームは下記の流れで実装しました。  
