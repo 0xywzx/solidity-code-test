@@ -313,7 +313,7 @@ class App extends Component {
                           return <span className="status-waiting-guest">Waiting guset</span>
                           else if (Number(game.gameStatus) === 1)
                           return <>
-                            <span className="status-guest-joined">Guset Joined</span><br />
+                            <span className="status-guest-joined">Guset joined</span><br />
                             <span className="instruction">Choose same hand and tye same password</span><br />
                             <span>
                               Hand : 
@@ -336,10 +336,10 @@ class App extends Component {
                           </>
                           else if (Number(game.gameStatus) === 2)
                           return <>
-                            <span className="status-draw">draw</span>
+                            <span className="status-draw">Draw</span>
                             <button
                               onClick={(e) => { this.getEther(game) }}>
-                              Get ether
+                              Get Ether
                             </button>
                           </>
                           else if (Number(game.gameStatus) === 3)
@@ -347,7 +347,7 @@ class App extends Component {
                             <span className="status-win">You win!</span>
                             <button
                               onClick={(e) => { this.getEtherFromWinner(game) }}>
-                              Get ether
+                              Get Ether
                             </button>
                           </>  
                           else if (Number(game.gameStatus) === 4)
@@ -389,10 +389,10 @@ class App extends Component {
                           return <span className="status-waiting-response">Waiting host response</span>
                           else if (Number(game.gameStatus) === 2)
                           return <>
-                            <span className="status-draw">draw</span>
+                            <span className="status-draw">Draw</span>
                             <button
                               onClick={(e) => { this.getEther(game) }}>
-                              Get ether
+                              Get Ether
                             </button>
                           </>
                           else if (Number(game.gameStatus) === 3)
@@ -402,7 +402,7 @@ class App extends Component {
                             <span className="status-win">You win!</span>
                             <button
                               onClick={(e) => { this.getEtherFromWinner(game) }}>
-                              Get ether
+                              Get Ether
                             </button>
                           </>  
                           else if (Number(game.gameStatus) === 5)
