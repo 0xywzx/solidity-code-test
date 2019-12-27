@@ -80,7 +80,6 @@ class App extends Component {
       console.log(receipt)
       const game = await this.state.gameContract.methods.getGameInfo(Number(receipt.events.CreatedGame.returnValues.gameId)).call()
       this.setState({
-        openGames: [...this.state.openGames, game],
         hostedGames: [...this.state.hostedGames, game]
       })
     })
