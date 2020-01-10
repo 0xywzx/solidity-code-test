@@ -29,7 +29,7 @@ contract GameContract {
   }
 
   // 1. create game (deposit ether, hand will be encrypted with passward)
-  function createGame(uint256 _hand, string memory _passward) public payable {
+  function createGame(uint256 _hand, string calldata _passward) external payable {
     gameId = gameId + 1;
     bytes32 _hostPlayerHand = keccak256(abi.encodePacked(_hand, _passward));
     games[gameId] = Game(gameId, msg.sender, _hostPlayerHand, temporalGuestPlayer, 0, 0, msg.value, now);
@@ -37,7 +37,7 @@ contract GameContract {
     emit CreatedGame(gameId);
   }
 
-  function deposit(uint256 _gameId) public payable {
+  function deposit(uint256 _gameId) private {
     balanceOf[msg.sender][_gameId] = balanceOf[msg.sender][_gameId] + msg.value;
   }
 
@@ -46,7 +46,7 @@ contract GameContract {
 	}
 
   // **1** when no guest joined
-  function closeGame(uint256 _gameId) public {
+  function closeGame(uint256 _gameId) external {
     Game memory _game = games[_gameId];
     require(_game.gameStatus == 0);
     require(_game.hostPlayer == msg.sender);
@@ -58,7 +58,7 @@ contract GameContract {
   }
 
   // 2. Join game (deposit, hand)
-  function joinGame(uint256 _gameId, uint256 _hand) public payable {
+  function joinGame(uint256 _gameId, uint256 _hand) external payable {
     Game memory _game = games[_gameId];
     require(_game.hostPlayer != msg.sender);
     require(_game.depositAmount == msg.value);
@@ -72,7 +72,7 @@ contract GameContract {
   }
 
   // **2** when host player has no response
-  function closeGameByGuest(uint256 _gameId) public {
+  function closeGameByGuest(uint256 _gameId) external {
     Game memory _game = games[_gameId];
     require(_game.gameStatus == 1);
     require(_game.guestPlayer == msg.sender);
@@ -84,7 +84,7 @@ contract GameContract {
   }
 
   // 3. show game result
-  function gameResult(uint256 _gameId, uint256 _hand, string memory _passward) public {
+  function gameResult(uint256 _gameId, uint256 _hand, string calldata _passward) external {
     Game memory _game = games[_gameId];
     require(_game.hostPlayer == msg.sender);
     require(_game.gameStatus == 1);
@@ -104,7 +104,7 @@ contract GameContract {
   }
 
   // 4-1. get ether from winner
-  function getDepositedEtherFromWinner(uint256 _gameId) public payable {
+  function getDepositedEtherFromWinner(uint256 _gameId) external payable {
     Game memory _game = games[_gameId];
     require((_game.gameStatus == 3 && _game.hostPlayer == msg.sender) || (_game.gameStatus == 4) && (_game.guestPlayer == msg.sender)); 
     require(balanceOf[msg.sender][_gameId] >= _game.depositAmount*2);
@@ -115,7 +115,7 @@ contract GameContract {
   }
 
   // 4-2. get deposited ether from a draw game
-  function getDepositedEther(uint256 _gameId) public payable {
+  function getDepositedEther(uint256 _gameId) external payable {
     Game memory _game = games[_gameId];
     require(_game.gameStatus == 2);
     require((_game.hostPlayer == msg.sender) || (_game.guestPlayer == msg.sender)); 
